@@ -27,6 +27,7 @@ new_small_image = None
 previous_payload = None
 original_status = None
 ws_connected = True
+arrpc_ready = False
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(current_path, 'config.json')
@@ -237,7 +238,12 @@ def signal_handler(sig, frame):
     os._exit(0)
 
 def start_node_server():
-    subprocess.run(["node", node_server_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    global arrpc_ready
+    process = subprocess.Popen(["node", node_server_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while process.poll() is None:
+      for line in iter(process.stdout.readline, b""):
+        decoded_line = line.decode("utf-8")
+        if "started" in decoded_line: arrpc_ready = True # Clear RPC when jellyfin-rpc clears it
 
 def start_jellyfin_rpc():
     process = subprocess.Popen(jellyfin_rpc_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -251,7 +257,8 @@ if __name__ == "__main__":
     arrpc_thread = threading.Thread(target=start_node_server, daemon=True)
     jellyfin_rpc_thread = threading.Thread(target=start_jellyfin_rpc, daemon=True)
     arrpc_thread.start()
-    time.sleep(5)
+    while not arrpc_ready:
+        time.sleep(1)
     jellyfin_rpc_thread.start()
   
     ws = websocket.WebSocketApp("wss://gateway.discord.gg/?v=10&encoding=json",
