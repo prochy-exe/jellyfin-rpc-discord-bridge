@@ -30,13 +30,14 @@ ws_connected = True
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(current_path, 'config.json')
-if os.path.exists(config_path):
-  with open(config_path, "r") as f:
+if not os.path.exists(config_path):
+    printinfo("Generating config...")
+    import config_generator
+    config_generator.config()
+
+with open(config_path, "r") as f:
     # Load the JSON data
     config = json.load(f)
-else:
-  printerr("Please generate config first!")
-  exit(0)
 
 params = {}
 for i in range(1, 4):
