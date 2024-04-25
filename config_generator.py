@@ -38,11 +38,12 @@ def config():
                 jellyfin_path = "skip"
             else:
                 if current_platform == "Linux":
-                    jellyfin_path = os.environ['HOME'] + ".local/bin/jellyfin-rpc"
+                    jellyfin_path = os.path.join(os.environ['HOME'], ".local/bin/jellyfin-rpc")
                 else:
-                    jellyfin_path = os.environ['APPDATA'] +    os.path.join('jellyfin-rpc', 'jellyfin-rpc.exe')
+                    jellyfin_path = os.path.join(os.environ['APPDATA'], os.path.join('jellyfin-rpc', 'jellyfin-rpc.exe'))
         else:
-            jellyfin_path = rf"{input('Where is your jellyfin rpc located?\n')}"
+            prompt = 'Where is your jellyfin rpc located?\n'
+            jellyfin_path = rf"{input(prompt)}"
     else:
         if input("Jellyfin-rpc is required, install now?(y/n)\n") == "y":
             if input("Install automatically?(y/n)\n") == "y":
@@ -51,9 +52,9 @@ def config():
                     subprocess.run(["chmod", "+x", 'installer.py'])
                 subprocess.run([python_package, os.path.join(current_path, 'installer.py')])
                 if current_platform == "Linux":
-                    jellyfin_path = os.environ['HOME'] + ".local/bin/jellyfin-rpc"
+                    jellyfin_path = os.path.join(os.environ['HOME'], ".local/bin/jellyfin-rpc")
                 else:
-                    jellyfin_path = os.environ['APPDATA'] + os.path.join('jellyfin-rpc', 'jellyfin-rpc.exe')
+                    jellyfin_path = os.path.join(os.environ['APPDATA'], os.path.join('jellyfin-rpc', 'jellyfin-rpc.exe'))
             else:
                 print("Manual install requires you to create the config manually, please follow steps here: [https://github.com/Radiicall/jellyfin-rpc/wiki/Installation]")
                 print("Downloading latest binary...")
@@ -82,27 +83,30 @@ def config():
     style2 = "Anime title\n"
     style2 += "S01 - E01 Episode name\n"
     style2 += "Streaming on Jellyfin™\n"
-    print(f"------------\n(1)\n{style1}------------\n(2)\n{style2}------------")
+    print("------------\n(1)\n"+f"{style1}"+"------------\n(2)\n"f"{style2}"+"------------")
     print("So, what's your choice?")
     config_dict['rpc_style'] = int(input()) - 1
     app_title = "Jellyfin" if config_dict['rpc_style'] == 0 else "Anime title"
     print("Choose your RPC type:")
-    rpc1 = f"Playing a game\n"
+    rpc1 = f"Playing a game" + "\n"
     rpc1 += style1
-    rpc2 = f"Watching {app_title}\n" #superior in everyway fr
+    rpc2 = f"Watching {app_title}" + "\n" #superior in everyway fr
     rpc2 += style2
-    print(f"------------\n(1)\n{rpc1}------------\n(2)\n{rpc2}------------")
+    print("------------\n(1)\n"+f"{rpc1}"+"------------\n(2)\n"f"{rpc2}"+"------------")
     print("So, what's your choice?")
     config_dict['rpc_type'] = int(input()) - 1
     with open(config_path, "w") as file:
             json.dump(config_dict, file, indent=4)
     print("Config generation completed, installing required files now...")
-    subprocess.run(["pip", "install", "websocket-client"], shell=True)
+    kwargs = {}
+    if current_platform == "Windows":
+        kwargs['shell'] = True
+    subprocess.run(["pip", "install", "websocket-client"], **kwargs)
     if not is_node_installed:
         if current_platform == "Linux":
             try:
-                subprocess.run(["curl", "-sL", "https://deb.nodesource.com/setup_20.x", "|", "sudo", "-E", "bash", "-"], shell=True)
-                subprocess.run(["sudo", "apt-get", "install", "-y", "nodejs"], shell=True)
+                subprocess.run(["curl", "-sL", "https://deb.nodesource.com/setup_20.x", "|", "sudo", "-E", "bash", "-"])
+                subprocess.run(["sudo", "apt-get", "install", "-y", "nodejs"])
             except:
                 print("Failed installing node.js, please install manually! [https://nodejs.org/en/download]")
         else:
@@ -110,7 +114,7 @@ def config():
     if not is_git_installed:
         if current_platform == "Linux":
             try:
-                subprocess.run(["sudo", "apt-get", "install", "-y", "git"], shell=True)
+                subprocess.run(["sudo", "apt-get", "install", "-y", "git"])
             except:
                 print("Failed installing git, please install manually! [https://git-scm.com/download/linux]")
         else:
@@ -119,8 +123,8 @@ def config():
             except:
                 print("Failed installing git, please install manually! [https://git-scm.com/download/win]")
     print("Cloning arRPC...")
-    subprocess.run(["git", "clone", "https://github.com/OpenAsar/arrpc", config_dict['node_path'].removesuffix("src")], shell=True)
-    subprocess.run(["npm", "install"], shell=True, cwd=config_dict["node_path"].removesuffix("src"))
+    subprocess.run(["git", "clone", "https://github.com/OpenAsar/arrpc", config_dict['node_path'].removesuffix("src")], **kwargs)
+    subprocess.run(["npm", "install"], cwd=config_dict['node_path'].removesuffix('src'), **kwargs)
 
 if __name__ == "__main__":
     config()
