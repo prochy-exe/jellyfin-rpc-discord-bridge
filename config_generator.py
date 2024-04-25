@@ -47,7 +47,7 @@ if input('Is jellyfin-rpc installed?(y/n)\n') == 'y':
 else:
   if input('Jellyfin-rpc is required, install now?(y/n)\n') == 'y':
     if input('Install automatically?(y/n)\n') == 'y':
-      subprocess.run(['curl', '-o', os.path.join(current_path, 'installer.py'), '-L', 'https://raw.githubusercontent.com/Radiicall/jellyfin-rpc/main/scripts/installer.py'], cmd=True)
+      subprocess.run(['curl', '-o', os.path.join(current_path, 'installer.py'), '-L', 'https://raw.githubusercontent.com/Radiicall/jellyfin-rpc/main/scripts/installer.py'], shell=True)
       if current_platform == 'Linux':
         subprocess.run(['chmod', '+x', 'installer.py'])
       subprocess.run([python_package, os.path.join(current_path, 'installer.py')])
@@ -67,7 +67,7 @@ else:
           rpc_binary = "jellyfin-rpc-x86_64-linux"
       else:
         rpc_binary = 'jellyfin-rpc.exe'
-      subprocess.run(["curl", "-o", os.path.join(current_path, rpc_binary), "-L", f"https://github.com/Radiicall/jellyfin-rpc/releases/latest/download/{rpc_binary}"], cmd=True)
+      subprocess.run(["curl", "-o", os.path.join(current_path, rpc_binary), "-L", f"https://github.com/Radiicall/jellyfin-rpc/releases/latest/download/{rpc_binary}"], shell=True)
       jellyfin_path = os.path.join(current_path, rpc_binary)
   else:
     print("Config generation can't continue without it, exiting...")
@@ -98,12 +98,12 @@ config_dict['rpc_type'] = int(input()) - 1
 with open(config_path, "w") as file:
     json.dump(config_dict, file, indent=4)
 print('Config generation completed, installing required files now...')
-subprocess.run(['pip', 'install', 'websocket-client'], cmd=True)
+subprocess.run(['pip', 'install', 'websocket-client'], shell=True)
 if not is_node_installed:
   if current_platform == 'Linux':
     try:
-      subprocess.run(['curl', '-sL', 'https://deb.nodesource.com/setup_20.x', '|', 'sudo', '-E', 'bash', '-'], cmd=True)
-      subprocess.run(['sudo', 'apt-get', 'install', '-y', 'nodejs'], cmd=True)
+      subprocess.run(['curl', '-sL', 'https://deb.nodesource.com/setup_20.x', '|', 'sudo', '-E', 'bash', '-'], shell=True)
+      subprocess.run(['sudo', 'apt-get', 'install', '-y', 'nodejs'], shell=True)
     except:
       print('Failed installing node.js, please install manually! [https://nodejs.org/en/download]')
   else:
@@ -111,14 +111,14 @@ if not is_node_installed:
 if not is_git_installed:
   if current_platform == 'Linux':
     try:
-      subprocess.run(['sudo', 'apt-get', 'install', '-y', 'git'], cmd=True)
+      subprocess.run(['sudo', 'apt-get', 'install', '-y', 'git'], shell=True)
     except:
       print('Failed installing git, please install manually! [https://git-scm.com/download/linux]')
   else:
     try:
-      subprocess.run(['winget', 'install', '--id', 'Git.Git', '-e', '--source', 'winget'], cmd=True)
+      subprocess.run(['winget', 'install', '--id', 'Git.Git', '-e', '--source', 'winget'], shell=True)
     except:
       print('Failed installing git, please install manually! [https://git-scm.com/download/win]')
 print('Cloning arRPC...')
-subprocess.run(['git', 'clone', 'https://github.com/OpenAsar/arrpc', config_dict['node_path'].removesuffix("src")], cmd=True)
-subprocess.run(['npm', 'install'], cmd=True, cwd=config_dict['node_path'].removesuffix("src"))
+subprocess.run(['git', 'clone', 'https://github.com/OpenAsar/arrpc', config_dict['node_path'].removesuffix("src")], shell=True)
+subprocess.run(['npm', 'install'], shell=True, cwd=config_dict['node_path'].removesuffix("src"))
