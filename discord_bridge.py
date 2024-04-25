@@ -142,10 +142,11 @@ def clear_rpc():
     ws.send(json.dumps(clear_payload))
 
 def on_message(ws, message):
-    global previous_payload, original_status
+    global previous_payload, original_status, previous_s
     payload = json.loads(message)
     op = payload.get('op')
     t = payload.get('t')
+    previous_s = payload.get('s')
 
     if op == 10:
         heartbeat_interval = payload['d']['heartbeat_interval']
@@ -157,11 +158,11 @@ def on_message(ws, message):
         websocket_event()
 
 def heartbeat(interval):
-    global ws_connected
+    global ws_connected, previous_s
     while ws_connected:
         payload = {
             "op": 1,
-            "d": None
+            "d": previous_s
         }
         ws.send(json.dumps(payload))
         printinfo("Sent heartbeat")
